@@ -2,10 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Board : MonoBehaviour
 {
+    public GameObject baseEntityPrefab;
+
     static int Index(int i, int j)
     {
         return m_Width * i + j;
@@ -18,6 +21,8 @@ public class Board : MonoBehaviour
     bool started = false;
     List<Node> m_Nodes;
     const int m_Width = 8, m_Height = 8;
+
+    List<GameObject> m_Pieces;
 
     //}
     void Start()
@@ -32,6 +37,29 @@ public class Board : MonoBehaviour
         }
 
         m_Nodes = m_Nodes.OrderBy(tile => -tile.Position().z).ThenBy(tile => tile.Position().x).ToList();
+
+        var obj = Instantiate(baseEntityPrefab);
+        obj.transform.position = new Vector3(m_Nodes[0].Position().x, m_Nodes[0].Position().y + obj.gameObject.GetComponentInChildren<MeshRenderer>().bounds.size.y, m_Nodes[0].Position().z);
+        //obj.GetComponent<BaseEntity>().Node = m_Nodes[0];
+        obj.GetComponent<BaseEntity>().SetIndex(0);
+
+
+        var obj2 = Instantiate(baseEntityPrefab);
+        obj2.transform.position = new Vector3(m_Nodes[15].Position().x, m_Nodes[15].Position().y + obj.gameObject.GetComponentInChildren<MeshRenderer>().bounds.size.y, m_Nodes[15].Position().z);
+        //obj2.GetComponent<BaseEntity>().Node = m_Nodes[15];
+        obj2.GetComponent<BaseEntity>().SetIndex(15);
+
+
+        var obj3 = Instantiate(baseEntityPrefab);
+        obj3.transform.position = new Vector3(m_Nodes[35].Position().x, m_Nodes[35].Position().y + obj.gameObject.GetComponentInChildren<MeshRenderer>().bounds.size.y, m_Nodes[35].Position().z);
+        obj3.GetComponent<BaseEntity>().SetIndex(35) ;
+
+        m_Pieces = new List<GameObject>
+        {
+            obj,
+            obj2,
+            obj3
+        };
     }
 
     // Update is called once per frame
@@ -39,10 +67,15 @@ public class Board : MonoBehaviour
     {
         if (!started)
         {
-            StartCoroutine(ColorNeighborsRed(0));
-            StartCoroutine(ColorNeighborsRed(5));
-            StartCoroutine(ColorNeighborsRed(20));
-            StartCoroutine(ColorNeighborsRed(40));
+            foreach (var obj in m_Pieces)
+            {
+                Debug.Log(obj.GetComponent<BaseEntity>().Index);
+                StartCoroutine(ColorNeighborsRed(obj.GetComponent<BaseEntity>().Index));
+            }
+            //StartCoroutine(ColorNeighborsRed(m_Pieces[0].GetComponent<BaseEntity>().Node.Index));
+            //StartCoroutine(ColorNeighborsRed(5));
+            //StartCoroutine(ColorNeighborsRed(20));
+            //StartCoroutine(ColorNeighborsRed(40));
             started = true;
         }
     }

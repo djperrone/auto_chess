@@ -1,16 +1,23 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public class BaseEntity : MonoBehaviour
 {
     private int m_MaxHealth, m_CurrentHealth, m_AttackPower, m_Protection, m_CritChance, m_Range, m_AttackSpeed;
     private string m_Name;
-    Vector3 m_Position;
+    int m_TileIndex;
+    //Node m_Node;
     BaseEntity m_Target;
 
+    public void SetIndex(int index)
+    {
+        m_TileIndex = index;
+    }
 
+    public int Index { get { return m_TileIndex; } set { m_TileIndex = value; } }
+    //public Node Node { get { return m_Node; } set { m_Node = value; } }
     // Start is called before the first frame update
     void Start()
     {

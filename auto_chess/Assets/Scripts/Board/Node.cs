@@ -5,7 +5,7 @@ using UnityEngine;
 public class Node
 {
     readonly GameObject m_Tile;
-    readonly int m_Index;
+    int m_Index;
     bool m_IsOccupied;
 
     public Node(GameObject tile, int index, bool isOccupied)
@@ -13,6 +13,18 @@ public class Node
         m_Tile = tile;
         m_Index = index;
         m_IsOccupied = isOccupied;
+    }
+
+    public void SetIndex(int index)
+    {
+        m_Index = index;
+    }
+
+    public Node(Node other)
+    {
+        m_Tile = other.m_Tile;
+        m_Index = other.m_Index;
+        m_IsOccupied |= other.m_IsOccupied;
     }
 
     public Vector3 Position()
