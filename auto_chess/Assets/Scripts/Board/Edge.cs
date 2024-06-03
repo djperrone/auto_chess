@@ -1,14 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
-public class Match : MonoBehaviour
+public class Edge : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject m_Board;
-
-    GameObject m_Player1, m_Player2;
+    Node m_Node1, m_Node2;
+    int m_Weight;
 
     // Start is called before the first frame update
     void Start()
