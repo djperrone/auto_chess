@@ -34,4 +34,9 @@ public struct Option<T>
         value = m_HasValue ? m_Value : default;
         return m_HasValue;
     }
+
+    public T GetValueUnchecked()
+    {
+        return m_Value;
+    }
 }

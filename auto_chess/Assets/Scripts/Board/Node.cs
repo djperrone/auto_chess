@@ -6,8 +6,36 @@ public class Node
 {
     readonly GameObject m_Tile;
     int m_Index;
-    bool m_IsOccupied;
+    bool m_IsOccupied = false;
+    //bool m_IsValidMove = true;
+    bool m_IsReserved = false;
+    string m_Owner;
+    public bool Reserve(string owner)
+    {
+        if (IsValidMove)
+        {
+            m_Owner = owner;
+            m_IsReserved = true;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
+    public bool IsValidMove { get { return !m_IsReserved && !m_IsOccupied; } }
+
+
+
+    //public bool IsReserved { get { return m_IsReserved; } set { 
+    //        if (!m_IsReserved && !m_IsOccupied)
+    //        m_IsReserved = value; 
+    //    } }
+    //public bool IsValidMove { get { return m_IsOccupied == false && m_IsReserved == false; }
+    //    set { }
+
+    //}
     public Node(GameObject tile, int index, bool isOccupied)
     {
         m_Tile = tile;
@@ -33,6 +61,22 @@ public class Node
     }
 
     public int Index { get { return m_Index; } }
-    public GameObject Tile{ get { return m_Tile; } }
-    public bool IsOccupied { get { return m_IsOccupied; } set { m_IsOccupied = value; } }
+    public GameObject Tile { get { return m_Tile; } }
+    public bool IsOccupied { get { return m_IsOccupied; } }
+
+    public void Release(string id)
+    {
+        if (id == m_Owner)
+        {
+            m_IsOccupied = false;
+            m_IsReserved = false;
+        }
+    }
+
+    public string Owner { get { return m_Owner; } } 
+
+    //public bool Occupy()
+    //{
+    //    //if (IsVal)
+    //}
 }
