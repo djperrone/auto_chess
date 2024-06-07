@@ -335,7 +335,8 @@ namespace StarterAssets
 
             JumpAndGravity();
             GroundedCheck();
-            Move();
+            //Move();
+            MoveToTarget();
         }
 
         private void LateUpdate()
