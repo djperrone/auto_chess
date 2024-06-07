@@ -1,3 +1,4 @@
+using StarterAssets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using UnityEngine;
 public class Board : MonoBehaviour
 {
     public GameObject baseEntityPrefab;
+    public GameObject thirdPersonPrefab;
     private int count = 0;
 
     public GameObject SpawnPiece(int index, Color color)
@@ -18,6 +20,20 @@ public class Board : MonoBehaviour
         obj.transform.position = new Vector3(m_Nodes[index].Position().x, m_Nodes[index].Position().y + obj.gameObject.GetComponentInChildren<MeshRenderer>().bounds.size.y, m_Nodes[index].Position().z);
         //obj2.GetComponent<BaseEntity>().Node = m_Nodes[15];
         obj.GetComponent<BaseEntity>().TileIndex = index;
+        m_Nodes[index].Reserve(name);
+        obj.GetComponentInChildren<Renderer>().material.color = color;
+        return obj;
+    }
+
+    public GameObject SpawnThirdPersonPrefab(int index, Color color)
+    {
+        var obj = Instantiate(thirdPersonPrefab);
+        string name = "pieceID" + count++.ToString();
+        obj.GetComponent<ThirdPersonController>().Name = name;
+        obj.transform.position = new Vector3(m_Nodes[index].Position().x, m_Nodes[index].Position().y + 3.0f, m_Nodes[index].Position().z);
+        //obj.transform.position = new Vector3(m_Nodes[index].Position().x, m_Nodes[index].Position().y + obj.gameObject.GetComponentInChildren<MeshRenderer>().bounds.size.y, m_Nodes[index].Position().z);
+        //obj2.GetComponent<BaseEntity>().Node = m_Nodes[15];
+        obj.GetComponent<ThirdPersonController>().TileIndex = index;
         m_Nodes[index].Reserve(name);
         obj.GetComponentInChildren<Renderer>().material.color = color;
         return obj;
@@ -56,33 +72,19 @@ public class Board : MonoBehaviour
             m_Nodes[i].SetIndex(i);
         }
 
-        //var obj = Instantiate(baseEntityPrefab);
-        //obj.transform.position = new Vector3(m_Nodes[0].Position().x, m_Nodes[0].Position().y + obj.gameObject.GetComponentInChildren<MeshRenderer>().bounds.size.y, m_Nodes[0].Position().z);
-        ////obj.GetComponent<BaseEntity>().Node = m_Nodes[0];
-        //obj.GetComponent<BaseEntity>().TileIndex = 0;
-        //m_Nodes[0].Reserve(obj.gameObject.name);
-
-        var obj = SpawnPiece(0, Color.white);
-
-
-        //var obj2 = Instantiate(baseEntityPrefab);
-        //obj2.transform.position = new Vector3(m_Nodes[15].Position().x, m_Nodes[15].Position().y + obj.gameObject.GetComponentInChildren<MeshRenderer>().bounds.size.y, m_Nodes[15].Position().z);
-        ////obj2.GetComponent<BaseEntity>().Node = m_Nodes[15];
-        //obj2.GetComponent<BaseEntity>().TileIndex = 15;
-        //m_Nodes[15].Reserve(obj2.gameObject.name);
-        //obj2.GetComponentInChildren<Renderer>().material.color = Color.blue;
-        var obj2 = SpawnPiece(15, Color.blue);
+       
+        var obj = SpawnThirdPersonPrefab(0, Color.white);
 
 
 
-        //var obj3 = Instantiate(baseEntityPrefab);
-        //obj3.transform.position = new Vector3(m_Nodes[35].Position().x, m_Nodes[35].Position().y + obj.gameObject.GetComponentInChildren<MeshRenderer>().bounds.size.y, m_Nodes[35].Position().z);
-        //obj3.GetComponent<BaseEntity>().TileIndex = 35;
-        //m_Nodes[35].Reserve(obj3.gameObject.name);
-        //obj3.GetComponentInChildren<Renderer>().material.color = Color.green;
 
-        var obj3 = SpawnPiece(35, Color.green);
-        var obj4 = SpawnPiece(57, Color.yellow);
+        //var obj2 = SpawnPiece(15, Color.blue);
+        var obj2 = SpawnThirdPersonPrefab(15, Color.blue);
+
+        var obj3 = SpawnThirdPersonPrefab(35, Color.green);
+        //var obj3 = SpawnPiece(35, Color.green);
+        var obj4 = SpawnThirdPersonPrefab(57, Color.yellow);
+        //var obj4 = SpawnPiece(57, Color.yellow);
         m_Pieces = new List<GameObject>
         {
             obj,
@@ -90,29 +92,13 @@ public class Board : MonoBehaviour
             obj3
         };
 
-        //Stack<int> path = PathFinding.FindPath(obj.GetComponent<BaseEntity>().TileIndex, obj2.GetComponent<BaseEntity>().TileIndex, this);
-        obj.GetComponent<BaseEntity>().Target = obj2.GetComponent<BaseEntity>();
-        //obj.GetComponent<BaseEntity>().Calc;
-        //obj.GetComponent<BaseEntity>().Path = path;
+        obj.GetComponent<ThirdPersonController>().Target = obj2.GetComponent<ThirdPersonController>();
+        //obj.GetComponent<BaseEntity>().Target = obj2.GetComponent<BaseEntity>();
 
-        //Stack<int> path2 = PathFinding.FindPath(obj2.GetComponent<BaseEntity>().TileIndex, obj.GetComponent<BaseEntity>().TileIndex, this);
-        obj2.GetComponent<BaseEntity>().Target = obj3.GetComponent<BaseEntity>();
-        obj3.GetComponent<BaseEntity>().Target = obj4.GetComponent<BaseEntity>();
-        //obj2.GetComponent<BaseEntity>().Path = path;
-        Debug.Log("path :");
-
-
-        //var p2 = path.ToList();
-        //foreach(var p in p2)
-        //{
-        //    Debug.Log(p.ToString());
-        //}
-
-        //foreach(var p in path)
-        //{
-        //    var node = m_Nodes[p];
-        //    node.Tile.GetComponent<Renderer>().material.color = Color.red;
-        //}
+        obj2.GetComponent<ThirdPersonController>().Target = obj3.GetComponent<ThirdPersonController>();
+        //obj2.GetComponent<BaseEntity>().Target = obj3.GetComponent<BaseEntity>();
+        obj3.GetComponent<ThirdPersonController>().Target = obj4.GetComponent<ThirdPersonController>();
+        //obj3.GetComponent<BaseEntity>().Target = obj4.GetComponent<BaseEntity>();
     }
 
     // Update is called once per frame

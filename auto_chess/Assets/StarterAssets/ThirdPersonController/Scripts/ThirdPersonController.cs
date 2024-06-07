@@ -1,4 +1,5 @@
-﻿ using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -110,6 +111,182 @@ namespace StarterAssets
 
         private bool _hasAnimator;
 
+        // my stuff
+        private string m_Name;
+        int m_TileIndex;
+        //Node m_Node;
+        ThirdPersonController m_Target;
+        int m_LastKnownTargetIndex;
+        Stack<int> m_Path;
+        //float m_Range = 1.50f;
+
+        private bool m_IsMoving = false;
+        private float m_MovementSpeed = 2.50f;
+        private int m_MaxHealth, m_CurrentHealth, m_AttackPower, m_Protection, m_CritChance, m_AttackSpeed;
+        private int m_Range = 1;
+        public int TileIndex { get { return m_TileIndex; } set { m_TileIndex = value; } }
+
+        public ThirdPersonController Target
+        {
+            get { return m_Target; }
+            set
+            {
+                if (m_Target)
+                {
+                    Debug.Log(this.Name + "already has target");
+                }
+                else
+                {
+                    Debug.Log("setting target" + value.Name);
+                    m_Target = value;
+                    m_LastKnownTargetIndex = value.GetComponent<ThirdPersonController>().TileIndex;
+                    CalcPathToTarget();
+                }
+            }
+        }
+
+        public Stack<int> Path
+        {
+            get { return m_Path; }
+            set
+            {
+                if (value != null)
+                {
+                    Debug.Log("setting path");
+                    Debug.Log(value);
+                    m_Path = value;
+                    m_IsMoving = true;
+                }
+                else
+                {
+                    Debug.Log("Path not found");
+                }
+            }
+        }
+
+        public void MoveToTarget()
+        {
+            if (m_Target == null)
+            {
+                // find targdet
+                return;
+            }
+            Board board = GameObject.Find("GameBoard").GetComponent<Board>();
+
+            if (m_Target.TileIndex != m_LastKnownTargetIndex && !IsInRange(m_Target))
+            {
+                // might need rotate if un rabge
+                CalcPathToTarget();
+            }
+
+            if (IsInRange(m_Target) && !IsMoving)
+            {
+                //if (m_IsMoving)
+                //{
+                //    var nextNode = board.At(TileIndex);
+                //    //transform.position = new Vector3(nextNode.Position().x, transform.position.y, nextNode.Position().z);
+
+                //    m_IsMoving = false;
+                //}
+                //Attack
+                return;
+            }
+            if (!IsInRange(m_Target) && !IsMoving)
+            {
+                CalcPathToTarget();
+            }
+
+            if (IsMoving && m_Path.Count > 0)
+            {
+                int nextIndex = m_Path.Peek();
+                if (board.At(nextIndex).Owner != Name)
+                {
+                    CalcPathToTarget();
+                }
+                var target = board.At(nextIndex);
+                board.At(nextIndex).Tile.GetComponent<Renderer>().material.color = gameObject.GetComponentInChildren<Renderer>().material.color;
+
+                if (!MoveTowards(target))
+                {
+                }
+                else
+                {
+                    // Finished Moving to target but not finished path
+                    board.At(m_TileIndex).Release(Name);
+                    m_TileIndex = nextIndex;
+                    board.At(nextIndex).Reserve(Name);
+                    m_Path.Pop();
+
+                    if (m_Path.Count == 0)
+                    {
+                        m_IsMoving = false;
+                    }
+                }
+            }
+            else
+            {
+                m_IsMoving = false;
+            }
+
+            Debug.Log(Name + " is moving?: " + m_IsMoving.ToString());
+        }
+
+        public void CalcPathToTarget()
+        {
+            Board board = GameObject.Find("GameBoard").GetComponent<Board>();
+            m_Path = PathFinding.FindPath(TileIndex, m_Target.TileIndex, board);
+
+            m_LastKnownTargetIndex = m_Target.TileIndex;
+            m_IsMoving = true;
+            if (m_Path.Count > 0)
+            {
+                board.At(m_Path.Peek()).Reserve(Name);
+            }
+
+        }
+
+        // true if at position, false if still needs to move
+        protected bool MoveTowards(Node nextNode)
+        {
+            Vector3 direction = (nextNode.Position() - this.transform.position);
+            if (direction.sqrMagnitude <= 0.01f)
+            {
+                transform.position = new Vector3(nextNode.Position().x, transform.position.y, nextNode.Position().z);
+                //animator.SetBool("walking", false);
+                return true;
+            }
+            //animator.SetBool("walking", true);
+
+            this.transform.position += direction.normalized * m_MovementSpeed * Time.deltaTime;
+            //Debug.Log("pos: " + this.transform.position.ToString());
+            return false;
+        }
+
+        public int MaxHealth { get { return m_MaxHealth; } set { m_MaxHealth = value; } }
+        public int CurrentHealth { get { return m_CurrentHealth; } set { m_CurrentHealth = value; } }
+
+        public int AttackPower { get { return m_AttackPower; } set { m_AttackPower = value; } }
+        public int AttackSpeed { get { return m_AttackSpeed; } set { m_AttackSpeed = value; } }
+        public int Protection { get { return m_Protection; } set { m_Protection = value; } }
+        public int Range { get { return m_Range; } set { m_Range = value; } }
+        public int CritChance { get { return m_CritChance; } set { m_CritChance = value; } }
+        public string Name { get { return m_Name; } set { m_Name = value; } }
+        public Vector3 Position { get { return gameObject.transform.position; } set { gameObject.transform.position = value; } }
+
+        public bool IsMoving { get { return m_IsMoving; } set { m_IsMoving = value; } }
+
+        public bool IsInRange(ThirdPersonController other)
+        {
+            return Board.ChebyshevDistance1D(m_TileIndex, other.TileIndex) <= m_Range;
+            //return Distance(other) <= m_Range;
+        }
+
+        public float Distance(ThirdPersonController other)
+        {
+            return Vector3.Distance(Position, other.Position);
+        }
+
+
         private bool IsCurrentDeviceMouse
         {
             get
@@ -135,7 +312,7 @@ namespace StarterAssets
         private void Start()
         {
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-            
+
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
@@ -163,7 +340,7 @@ namespace StarterAssets
 
         private void LateUpdate()
         {
-            CameraRotation();
+            //CameraRotation();
         }
 
         private void AssignAnimationIDs()
@@ -190,28 +367,96 @@ namespace StarterAssets
             }
         }
 
-        private void CameraRotation()
-        {
-            // if there is an input and camera position is not fixed
-            if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
-            {
-                //Don't multiply mouse input by Time.deltaTime;
-                float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
+        //private void CameraRotation()
+        //{
+        //    // if there is an input and camera position is not fixed
+        //    if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
+        //    {
+        //        //Don't multiply mouse input by Time.deltaTime;
+        //        float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
 
-                _cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
-                _cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
-            }
+        //        _cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
+        //        _cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
+        //    }
 
-            // clamp our rotations so our values are limited 360 degrees
-            _cinemachineTargetYaw = ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
-            _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
+        //    // clamp our rotations so our values are limited 360 degrees
+        //    _cinemachineTargetYaw = ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
+        //    _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
 
-            // Cinemachine will follow this target
-            CinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,
-                _cinemachineTargetYaw, 0.0f);
-        }
+        //    // Cinemachine will follow this target
+        //    CinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,
+        //        _cinemachineTargetYaw, 0.0f);
+        //}
 
         private void Move()
+        {
+            // set target speed based on move speed, sprint speed and if sprint is pressed
+            float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+
+            // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
+
+            // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
+            // if there is no input, set the target speed to 0
+            if (_input.move == Vector2.zero) targetSpeed = 0.0f;
+
+            // a reference to the players current horizontal velocity
+            float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
+
+            float speedOffset = 0.1f;
+            float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
+
+            // accelerate or decelerate to target speed
+            if (currentHorizontalSpeed < targetSpeed - speedOffset ||
+                currentHorizontalSpeed > targetSpeed + speedOffset)
+            {
+                // creates curved result rather than a linear one giving a more organic speed change
+                // note T in Lerp is clamped, so we don't need to clamp our speed
+                _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude,
+                    Time.deltaTime * SpeedChangeRate);
+
+                // round speed to 3 decimal places
+                _speed = Mathf.Round(_speed * 1000f) / 1000f;
+            }
+            else
+            {
+                _speed = targetSpeed;
+            }
+
+            _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
+            if (_animationBlend < 0.01f) _animationBlend = 0f;
+
+            // normalise input direction
+            Vector3 inputDirection = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
+
+            // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
+            // if there is a move input rotate player when the player is moving
+            if (_input.move != Vector2.zero)
+            {
+                _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
+                                  _mainCamera.transform.eulerAngles.y;
+                float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
+                    RotationSmoothTime);
+
+                // rotate to face input direction relative to camera position
+                transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+            }
+
+
+            Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+
+            // move the player
+            _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
+                             new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+
+            // update animator if using character
+            if (_hasAnimator)
+            {
+                _animator.SetFloat(_animIDSpeed, _animationBlend);
+                _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
+            }
+        }
+
+        private void MoveTowardTarget()
         {
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;

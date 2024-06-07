@@ -68,60 +68,7 @@ public class BaseEntity : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         Move();
-        //if (m_Target != null) // && target not dead
-        //{
-
-
-        //    //if (!IsInRange(m_Target) && !IsMoving)
-
-        //    Board board = GameObject.Find("GameBoard").GetComponent<Board>();
-        //    if ((m_Target.IsMoving || m_Target.TileIndex != m_LastKnownTargetIndex) && !IsInRange(m_Target))
-        //    {
-
-        //        m_Path = PathFinding.FindPath(TileIndex, m_Target.TileIndex, board);
-        //        m_LastKnownTargetIndex = m_Target.TileIndex;
-        //        IsMoving = true;
-        //    }
-        //    if (m_Path != null && m_Path.Count > 0 && board.At(m_Path.Peek()).IsOccupied)
-        //    {
-        //        m_Path = PathFinding.FindPath(TileIndex, m_Target.TileIndex, board);
-        //        m_LastKnownTargetIndex = m_Target.TileIndex;
-        //        IsMoving = true;
-        //    }
-        //    //Debug.Log("Update???00");
-        //    Debug.Log("Has path");
-        //    if (m_Path != null && m_Path.Count > 0 && m_TileIndex != m_Path.First())
-        //    {
-
-        //        m_IsMoving = true;
-        //        Debug.Log("Needs to mvoe");
-        //        int next = m_Path.Peek();
-        //        //Board board = GameObject.Find("GameBoard").GetComponent<Board>();
-        //        if (board != null)
-        //        {
-        //            Debug.Log("Found board");
-        //            Node target = board.At(next);
-        //            // Still Moving
-        //            if (!MoveTowards(target))
-        //            {
-        //            }
-        //            else
-        //            {
-        //                // Finished Moving
-        //                board.At(m_TileIndex).IsOccupied = false;
-        //                m_TileIndex = next;
-        //                board.At(next).IsOccupied = true;
-        //                m_Path.Pop();
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        m_IsMoving = false;
-        //    }
-        //}
     }
 
     void Move()

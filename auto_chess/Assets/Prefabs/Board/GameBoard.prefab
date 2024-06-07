@@ -141,6 +141,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d640a8ff0294a024cadc87394f216e9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  baseEntityPrefab: {fileID: 0}
+  thirdPersonPrefab: {fileID: 4514818061935473640, guid: 926ac9e9bbbbaa74797353eb089c9e36, type: 3}
 --- !u!1 &9012467222677676915
 GameObject:
   m_ObjectHideFlags: 0
